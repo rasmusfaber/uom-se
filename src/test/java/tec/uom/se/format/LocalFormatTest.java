@@ -29,15 +29,16 @@
  */
 package tec.uom.se.format;
 
-import static org.junit.Assert.*;
-
-import static tec.uom.se.unit.MetricPrefix.*;
-import static tec.uom.se.unit.Units.*;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import javax.measure.Unit;
 import javax.measure.format.UnitFormat;
-import org.junit.Ignore;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static tec.uom.se.unit.MetricPrefix.KILO;
+import static tec.uom.se.unit.MetricPrefix.MILLI;
+import static tec.uom.se.unit.Units.METRE;
 
 /**
  * @author <a href="mailto:units@catmedia.us">Werner Keil</a>

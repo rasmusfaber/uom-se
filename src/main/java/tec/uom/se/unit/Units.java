@@ -35,6 +35,7 @@ import tec.uom.se.AbstractSystemOfUnits;
 import tec.uom.se.AbstractUnit;
 import tec.uom.se.function.AddConverter;
 import tec.uom.se.function.PiMultiplierConverter;
+import tec.uom.se.function.PowerOfTenConverter;
 import tec.uom.se.function.RationalConverter;
 import tec.uom.se.quantity.QuantityDimension;
 
@@ -102,7 +103,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
    * The SI base unit for electric current quantities (standard name <code>A</code>). The Ampere is that constant current which, if maintained in two
    * straight parallel conductors of infinite length, of negligible circular cross-section, and placed 1 meter apart in vacuum, would produce between
    * these conductors a force equal to 2 * 10-7 newton per meter of length. It is named after the French physicist Andre Ampere (1775-1836).
-   * 
+   *
    * @implNote SI Base Unit
    */
   public static final Unit<ElectricCurrent> AMPERE = addUnit(new BaseUnit<ElectricCurrent>("A", QuantityDimension.ELECTRIC_CURRENT),
@@ -112,7 +113,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
    * The SI base unit for luminous intensity quantities (standard name <code>cd</code>). The candela is the luminous intensity, in a given direction,
    * of a source that emits monochromatic radiation of frequency 540 * 1012 hertz and that has a radiant intensity in that direction of 1/683 watt per
    * steradian
-   * 
+   *
    * @see <a href="http://en.wikipedia.org/wiki/Candela"> Wikipedia: Candela</a>
    *
    * @implNote SI Base Unit
@@ -123,7 +124,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
   /**
    * The SI base unit for thermodynamic temperature quantities (standard name <code>K</code>). The kelvin is the 1/273.16th of the thermodynamic
    * temperature of the triple point of water. It is named after the Scottish mathematician and physicist William Thomson 1st Lord Kelvin (1824-1907)
-   * 
+   *
    * @implNote SI Base Unit
    */
   public static final Unit<Temperature> KELVIN = addUnit(new BaseUnit<Temperature>("K", QuantityDimension.TEMPERATURE), Temperature.class);
@@ -131,7 +132,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
   /**
    * The SI base unit for mass quantities (standard name <code>kg</code>). It is the only SI unit with a prefix as part of its name and symbol. The
    * kilogram is equal to the mass of an international prototype in the form of a platinum-iridium cylinder kept at Sevres in France.
-   * 
+   *
    * @see #GRAM
    *
    * @implNote SI Base Unit
@@ -141,7 +142,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
   /**
    * The SI base unit for length quantities (standard name <code>m</code>). One metre was redefined in 1983 as the distance traveled by light in a
    * vacuum in 1/299,792,458 of a second.
-   * 
+   *
    * @implNote SI Base Unit
    */
   public static final Unit<Length> METRE = addUnit(new BaseUnit<>("m", QuantityDimension.LENGTH), Length.class);
@@ -149,7 +150,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
   /**
    * The SI base unit for amount of substance quantities (standard name <code>mol</code>). The mole is the amount of substance of a system which
    * contains as many elementary entities as there are atoms in 0.012 kilogram of carbon 12.
-   * 
+   *
    * @implNote SI Base Unit
    */
   public static final Unit<AmountOfSubstance> MOLE = addUnit(new BaseUnit<>("mol", QuantityDimension.AMOUNT_OF_SUBSTANCE), AmountOfSubstance.class);
@@ -157,7 +158,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
   /**
    * The SI base unit for duration quantities (standard name <code>s</code>). It is defined as the duration of 9,192,631,770 cycles of radiation
    * corresponding to the transition between two hyperfine levels of the ground state of cesium (1967 Standard).
-   * 
+   *
    * @implNote SI Base Unit
    */
   public static final Unit<Time> SECOND = addUnit(new BaseUnit<>("s", QuantityDimension.TIME), Time.class);
@@ -353,7 +354,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
   /**
    * A dimensionless unit accepted for use with SI units (standard name <code>%</code>).
    */
-  public static final Unit<Dimensionless> PERCENT = addUnit(new TransformedUnit<>(ONE, new RationalConverter(1, 100)));
+  public static final Unit<Dimensionless> PERCENT = addUnit(new TransformedUnit<>(ONE, new PowerOfTenConverter(-2)));
 
   // ////////
   // Time //
@@ -385,7 +386,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
 
   /**
    * An angle unit accepted for use with SI units (standard name <code>deg</code>).
-   * 
+   *
    * @deprecated Use from NonSI
    */
   public static final Unit<Angle> DEGREE_ANGLE = addUnit(new TransformedUnit<>(RADIAN, new PiMultiplierConverter().concatenate(new RationalConverter(
@@ -393,7 +394,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
 
   /**
    * An angle unit accepted for use with SI units (standard name <code>'</code>).
-   * 
+   *
    * @deprecated Use from SI
    */
   public static final Unit<Angle> MINUTE_ANGLE = addUnit(new TransformedUnit<>(RADIAN, new PiMultiplierConverter().concatenate(new RationalConverter(
@@ -401,7 +402,7 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
 
   /**
    * An angle unit accepted for use with SI units (standard name <code>''</code>).
-   * 
+   *
    * @deprecated Use from SI
    */
   public static final Unit<Angle> SECOND_ANGLE = addUnit(new TransformedUnit<>(RADIAN, new PiMultiplierConverter().concatenate(new RationalConverter(
@@ -409,15 +410,15 @@ public class Units extends AbstractSystemOfUnits implements Nameable {
 
   /**
    * A volume unit accepted for use with SI units (standard name <code>l</code>).
-   * 
+   *
    * @see <a href="https://en.wikipedia.org/wiki/Litre"> Wikipedia: Litre</a>
    */
   public static final Unit<Volume> LITRE = AbstractSystemOfUnits.Helper.addUnit(INSTANCE.units, new TransformedUnit<Volume>(CUBIC_METRE,
-      new RationalConverter(1, 1000)), "Litre", "l");
+      new PowerOfTenConverter(-3)), "Litre", "l");
 
   /**
    * Returns the unique instance of this class.
-   * 
+   *
    * @return the Units instance.
    */
   public static SystemOfUnits getInstance() {

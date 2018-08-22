@@ -31,17 +31,16 @@ package tec.uom.se.unit;
 
 import tec.uom.lib.common.function.SymbolSupplier;
 import tec.uom.lib.common.function.UnitConverterSupplier;
-import tec.uom.se.function.RationalConverter;
+import tec.uom.se.function.PowerOfTenConverter;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
 
-import java.math.BigInteger;
-
 /**
  * <p>
  * This class provides support for the 20 prefixes used in the metric system (decimal multiples and submultiples of units). For example:
+ * <p>
  * 
  * <pre>
  * <code>
@@ -54,25 +53,22 @@ import java.math.BigInteger;
  *     Unit<Length> KILOMETRE = KILO(METRE);
  *     </code>
  * </pre>
- * 
+ * <p>
  * </p>
  *
- * @see <a href="http://en.wikipedia.org/wiki/Metric_prefix">Wikipedia: Metric Prefix</a>
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @author <a href="mailto:units@catmedia.us">Werner Keil</a>
  * @version 0.9, 2015-12-30
+ * @see <a href="http://en.wikipedia.org/wiki/Metric_prefix">Wikipedia: Metric Prefix</a>
  */
 public enum MetricPrefix implements SymbolSupplier, UnitConverterSupplier {
-  YOTTA("Y", new RationalConverter(BigInteger.TEN.pow(24), BigInteger.ONE)), ZETTA("Z", new RationalConverter(BigInteger.TEN.pow(21), BigInteger.ONE)), EXA(
-      "E", new RationalConverter(BigInteger.TEN.pow(18), BigInteger.ONE)), PETA("P", new RationalConverter(BigInteger.TEN.pow(15), BigInteger.ONE)), TERA(
-      "T", new RationalConverter(BigInteger.TEN.pow(12), BigInteger.ONE)), GIGA("G", new RationalConverter(BigInteger.TEN.pow(9), BigInteger.ONE)), MEGA(
-      "M", new RationalConverter(BigInteger.TEN.pow(6), BigInteger.ONE)), KILO("k", new RationalConverter(BigInteger.TEN.pow(3), BigInteger.ONE)), HECTO(
-      "h", new RationalConverter(BigInteger.TEN.pow(2), BigInteger.ONE)), DEKA("da", new RationalConverter(BigInteger.TEN.pow(1), BigInteger.ONE)), DECI(
-      "d", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(1))), CENTI("c", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(2))), MILLI(
-      "m", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(3))), MICRO("µ", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(6))), NANO(
-      "n", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(9))), PICO("p", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(12))), FEMTO(
-      "f", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(15))), ATTO("a", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(18))), ZEPTO(
-      "z", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(21))), YOCTO("y", new RationalConverter(BigInteger.ONE, BigInteger.TEN.pow(24)));
+  YOTTA("Y", new PowerOfTenConverter(24)), ZETTA("Z", new PowerOfTenConverter(21)), EXA("E", new PowerOfTenConverter(18)), PETA("P",
+      new PowerOfTenConverter(15)), TERA("T", new PowerOfTenConverter(12)), GIGA("G", new PowerOfTenConverter(9)), MEGA("M", new PowerOfTenConverter(
+      6)), KILO("k", new PowerOfTenConverter(3)), HECTO("h", new PowerOfTenConverter(2)), DEKA("da", new PowerOfTenConverter(1)), DECI("d",
+      new PowerOfTenConverter(-1)), CENTI("c", new PowerOfTenConverter(-2)), MILLI("m", new PowerOfTenConverter(-3)), MICRO("µ",
+      new PowerOfTenConverter(-6)), NANO("n", new PowerOfTenConverter(-9)), PICO("p", new PowerOfTenConverter(-12)), FEMTO("f",
+      new PowerOfTenConverter(-15)), ATTO("a", new PowerOfTenConverter(-18)), ZEPTO("z", new PowerOfTenConverter(-21)), YOCTO("y",
+      new PowerOfTenConverter(-24));
 
   /**
    * The symbol of this prefix, as returned by {@link #getSymbol}.
@@ -99,7 +95,7 @@ public enum MetricPrefix implements SymbolSupplier, UnitConverterSupplier {
    * @param converter
    *          the associated unit converter.
    */
-  MetricPrefix(String symbol, RationalConverter converter) {
+  MetricPrefix(String symbol, UnitConverter converter) {
     this.symbol = symbol;
     this.converter = converter;
   }

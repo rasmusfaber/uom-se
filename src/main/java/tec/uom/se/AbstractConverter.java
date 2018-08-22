@@ -29,10 +29,9 @@
  */
 package tec.uom.se;
 
-import javax.measure.UnitConverter;
-
 import tec.uom.se.function.Converter;
 
+import javax.measure.UnitConverter;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -135,9 +134,8 @@ public abstract class AbstractConverter implements UnitConverter, Converter<Numb
    * This class represents the identity converter (singleton).
    */
   private static final class Identity extends AbstractConverter {
-
     /**
-		 * 
+		 *
 		 */
     private static final long serialVersionUID = -4460463244427587361L;
 
@@ -188,7 +186,7 @@ public abstract class AbstractConverter implements UnitConverter, Converter<Numb
   public static final class Pair extends AbstractConverter implements Serializable {
 
     /**
-		 * 
+		 *
 		 */
     private static final long serialVersionUID = -123063827821728331L;
 

@@ -32,6 +32,7 @@ package tec.uom.se;
 import tec.uom.se.format.SimpleUnitFormat;
 import tec.uom.se.function.AddConverter;
 import tec.uom.se.function.MultiplyConverter;
+import tec.uom.se.function.PowerOfTenConverter;
 import tec.uom.se.function.RationalConverter;
 import tec.uom.se.quantity.QuantityDimension;
 import tec.uom.se.spi.DimensionalModel;
@@ -53,29 +54,29 @@ import java.lang.reflect.Type;
  * <p>
  * The class represents units founded on the seven <b>SI</b> base units for seven base quantities assumed to be mutually independent.
  * </p>
- *
  * <p>
- * For all physics units, unit conversions are symmetrical: <code>u1.getConverterTo(u2).equals(u2.getConverterTo(u1).inverse())</code>. Non-physical
- * units (e.g. currency units) for which conversion is not symmetrical should have their own separate class hierarchy and are considered distinct
- * (e.g. financial units), although they can always be combined with physics units (e.g. "€/Kg", "$/h").
+ * <p>
+ * For all physics units, unit conversions are symmetrical: <code>u1.getConverterTo(u2).equals(u2.getConverterTo(u1)
+ * .inverse())</code>. Non-physical units (e.g. currency units) for which conversion is not symmetrical should have their own separate class hierarchy
+ * and are considered distinct (e.g. financial units), although they can always be combined with physics units (e.g. "€/Kg", "$/h").
  * </p>
  *
- * @see <a href= "http://en.wikipedia.org/wiki/International_System_of_Units">Wikipedia: International System of Units</a>
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @author <a href="mailto:units@catmedia.us">Werner Keil</a>
  * @version 1.0.8, August 8, 2017
+ * @see <a href= "http://en.wikipedia.org/wiki/International_System_of_Units">Wikipedia: International System of Units</a>
  * @since 1.0
  */
 public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableUnit<Q> {
 
   /**
-   * 
-   */
+	 *
+	 */
   private static final long serialVersionUID = -4344589505537030204L;
 
   /**
    * Holds the dimensionless unit <code>ONE</code>.
-   * 
+   *
    * @see <a href= "https://en.wikipedia.org/wiki/Natural_units#Choosing_constants_to_normalize"> Wikipedia: Natural Units - Choosing constants to
    *      normalize</a>
    * @see <a href= "http://www.av8n.com/physics/dimensionless-units.htm">Units of Dimension One</a>
@@ -97,6 +98,15 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
    */
   protected static final Map<String, Unit<?>> SYMBOL_TO_UNIT = new HashMap<>();
 
+  private static final Map<Double, Integer> DOUBLE_POWERS_OF_TEN = new HashMap<>();
+
+  static {
+    // Double.MIN_VALUE is approx. 4.9e-324 and Double.MAX_VALUE is approx. 1.8e308
+    for (int n = -324; n <= 308; n++) {
+      DOUBLE_POWERS_OF_TEN.put(Math.pow(10, n), n);
+    }
+  }
+
   /**
    * DefaultQuantityFactory constructor.
    */
@@ -110,11 +120,11 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
 
   /**
    * Indicates if this unit belongs to the set of coherent SI units (unscaled SI units).
-   * 
+   * <p>
    * The base and coherent derived units of the SI form a coherent set, designated the set of coherent SI units. The word coherent is used here in the
    * following sense: when coherent units are used, equations between the numerical values of quantities take exactly the same form as the equations
    * between the quantities themselves. Thus if only units from a coherent set are used, conversion factors between units are never required.
-   * 
+   *
    * @return <code>equals(toSystemUnit())</code>
    */
   public boolean isSystemUnit() {
@@ -124,9 +134,11 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
 
   /**
    * Returns the unscaled {@link SI} unit from which this unit is derived.
-   * 
-   * The SI unit can be be used to identify a quantity given the unit. For example:<code> static boolean isAngularVelocity(AbstractUnit<?> unit) {
-   * return unit.toSystemUnit().equals(RADIAN.divide(SECOND)); } assert(REVOLUTION.divide(MINUTE).isAngularVelocity()); // Returns true. </code>
+   * <p>
+   * The SI unit can be be used to identify a quantity given the unit. For example:<code> static boolean
+   * isAngularVelocity(AbstractUnit<?> unit) {
+   * return unit.toSystemUnit().equals(RADIAN.divide(SECOND)); } assert(REVOLUTION.divide(MINUTE).isAngularVelocity()
+   * ); // Returns true. </code>
    *
    * @return the unscaled metric unit from which this unit is derived.
    */
@@ -142,10 +154,11 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
 
   /**
    * Annotates the specified unit. Annotation does not change the unit semantic. Annotations are often written between curly braces behind units. For
-   * example:
-   * <code> AbstractUnit<Volume> PERCENT_VOL = Units.PERCENT.annotate("vol"); // "%{vol}" AbstractUnit<Mass> KG_TOTAL =
-   * Units.KILOGRAM.annotate("total"); // "kg{total}" AbstractUnit<Dimensionless> RED_BLOOD_CELLS = Units.ONE.annotate("RBC"); // "{RBC}" </code>
-   *
+   * example: <code> AbstractUnit<Volume> PERCENT_VOL = Units.PERCENT.annotate("vol"); // "%{vol}" AbstractUnit<Mass>
+   * KG_TOTAL =
+   * Units.KILOGRAM.annotate("total"); // "kg{total}" AbstractUnit<Dimensionless> RED_BLOOD_CELLS = Units.ONE
+   * .annotate("RBC"); // "{RBC}" </code>
+   * <p>
    * Note: Annotation of system units are not considered themselves as system units.
    *
    * @param annotation
@@ -158,9 +171,9 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
 
   /**
    * Returns the abstract unit represented by the specified characters as per default format.
-   *
+   * <p>
    * Locale-sensitive unit parsing could be handled using {@link LocalUnitFormat} in subclasses of AbstractUnit.
-   *
+   * <p>
    * <p>
    * Note: The standard format supports dimensionless units.<code> AbstractUnit<Dimensionless> PERCENT =
    * AbstractUnit.parse("100").inverse().asType(Dimensionless.class); </code>
@@ -179,7 +192,7 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
   /**
    * Returns the standard representation of this physics unit. The string produced for a given unit is always the same; it is not affected by the
    * locale. It can be used as a canonical string representation for exchanging units, or as a key for a Hashtable, etc.
-   *
+   * <p>
    * Locale-sensitive unit parsing could be handled using {@link LocalUnitFormat} in subclasses of AbstractUnit.
    *
    * @return <code>SimpleUnitFormat.getInstance().format(this)</code>
@@ -196,7 +209,8 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
   /**
    * Returns the system unit (unscaled SI unit) from which this unit is derived. They can be be used to identify a quantity given the unit. For
    * example:<br>
-   * <code> static boolean isAngularVelocity(AbstractUnit<?> unit) {<br>&nbsp;&nbsp;return unit.getSystemUnit().equals(RADIAN.divide(SECOND));<br>}
+   * <code> static boolean isAngularVelocity(AbstractUnit<?> unit) {<br>&nbsp;&nbsp;return unit.getSystemUnit()
+   * .equals(RADIAN.divide(SECOND));<br>}
    * <br>assert(REVOLUTION.divide(MINUTE).isAngularVelocity()); // Returns true. </code>
    *
    * @return the unscaled metric unit from which this unit is derived.
@@ -320,7 +334,7 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
   }
 
   @Override
-  public final AbstractUnit<Q> transform(UnitConverter operation) {
+  public AbstractUnit<Q> transform(UnitConverter operation) {
     Unit<Q> systemUnit = this.getSystemUnit();
     UnitConverter cvtr;
     if (this.isSystemUnit()) {
@@ -348,6 +362,10 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
       return this;
     if (isLongValue(factor))
       return transform(new RationalConverter(BigInteger.valueOf((long) factor), BigInteger.ONE));
+    Integer powerOfTen = checkPowerOfTen(factor);
+    if (powerOfTen != null) {
+      return transform(PowerOfTenConverter.of(powerOfTen));
+    }
     return transform(new MultiplyConverter(factor));
   }
 
@@ -355,9 +373,13 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
     return !((value < Long.MIN_VALUE) || (value > Long.MAX_VALUE)) && Math.floor(value) == value;
   }
 
+  private static Integer checkPowerOfTen(double value) {
+    return DOUBLE_POWERS_OF_TEN.get(value);
+  }
+
   /**
    * Returns the product of this unit with the one specified.
-   *
+   * <p>
    * <p>
    * Note: If the specified unit (that) is not a physical unit, then <code>that.multiply(this)</code> is returned.
    * </p>
@@ -403,13 +425,14 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
 
   /**
    * Returns the result of dividing this unit by the specifified divisor. If the factor is an integer value, the division is exact. For example:
+   * <p>
    * 
    * <pre>
    * <code>
    *    QUART = GALLON_LIQUID_US.divide(4); // Exact definition.
    * </code>
    * </pre>
-   * 
+   *
    * @param divisor
    *          the divisor value.
    * @return this unit divided by the specified divisor.
@@ -418,6 +441,10 @@ public abstract class AbstractUnit<Q extends Quantity<Q>> implements ComparableU
   public final AbstractUnit<Q> divide(double divisor) {
     if (divisor == 1)
       return this;
+    Integer powerOfTen = checkPowerOfTen(divisor);
+    if (powerOfTen != null) {
+      return transform(PowerOfTenConverter.of(-powerOfTen));
+    }
     if (isLongValue(divisor))
       return transform(new RationalConverter(BigInteger.ONE, BigInteger.valueOf((long) divisor)));
     return transform(new MultiplyConverter(1.0 / divisor));

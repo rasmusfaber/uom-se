@@ -48,7 +48,7 @@ import java.util.Objects;
  * <p>
  * This class represents units formed by the product of rational powers of existing physical units.
  * </p>
- *
+ * <p>
  * <p>
  * This class maintains the canonical form of this product (simplest form after factorization). For example: <code>METRE.pow(2).divide(METRE)</code>
  * returns <code>METRE</code>.
@@ -56,7 +56,6 @@ import java.util.Objects;
  *
  * @param <Q>
  *          The type of the quantity measured by this unit.
- *
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @author <a href="mailto:units@catmedia.us">Werner Keil</a>
  * @version 1.0.3, August 20, 2017
@@ -123,19 +122,38 @@ public final class ProductUnit<Q extends Quantity<Q>> extends AbstractUnit<Q> {
    * @return <code>left * right</code>
    */
   public static AbstractUnit<?> getProductInstance(Unit<?> left, Unit<?> right) {
-    Element[] leftElems;
-    if (left instanceof ProductUnit<?>) {
-      leftElems = ((ProductUnit<?>) left).elements;
-    } else {
-      leftElems = new Element[] { new Element(left, 1, 1) };
+    return getProductInstance(left, right, AbstractConverter.IDENTITY);
+  }
+
+  private static AbstractUnit<?> getProductInstance(Unit<?> left, Unit<?> right, UnitConverter converter) {
+    if (left instanceof TransformedUnit) {
+      TransformedUnit<?> transformedUnit = (TransformedUnit<?>) left;
+      if (transformedUnit.getParentUnit() instanceof ProductUnit) {
+        return getProductInstance(transformedUnit.getParentUnit(), right, converter.concatenate(transformedUnit.getConverter()));
+      }
     }
-    Element[] rightElems;
-    if (right instanceof ProductUnit<?>) {
-      rightElems = ((ProductUnit<?>) right).elements;
-    } else {
-      rightElems = new Element[] { new Element(right, 1, 1) };
+    if (right instanceof TransformedUnit) {
+      TransformedUnit<?> transformedUnit = (TransformedUnit<?>) right;
+      if (transformedUnit.getParentUnit() instanceof ProductUnit) {
+        return getProductInstance(left, transformedUnit.getParentUnit(), converter.concatenate(transformedUnit.getConverter()));
+      }
     }
-    return getInstance(leftElems, rightElems);
+    Element[] leftElems = getElements(left);
+    Element[] rightElems = getElements(right);
+    AbstractUnit<?> productUnit = getInstance(leftElems, rightElems);
+    if (converter.isIdentity()) {
+      return productUnit;
+    } else {
+      return new TransformedUnit(productUnit, converter);
+    }
+  }
+
+  private static Element[] getElements(Unit<?> unit) {
+    if (unit instanceof ProductUnit<?>) {
+      return ((ProductUnit<?>) unit).elements;
+    }
+    return new Element[] { new Element(unit, 1, 1) };
+
   }
 
   /**
@@ -148,21 +166,17 @@ public final class ProductUnit<Q extends Quantity<Q>> extends AbstractUnit<Q> {
    * @return <code>dividend / divisor</code>
    */
   public static AbstractUnit<?> getQuotientInstance(Unit<?> left, Unit<?> right) {
-    Element[] leftElems;
-    if (left instanceof ProductUnit<?>)
-      leftElems = ((ProductUnit<?>) left).elements;
-    else
-      leftElems = new Element[] { new Element(left, 1, 1) };
-    Element[] rightElems;
-    if (right instanceof ProductUnit<?>) {
-      Element[] elems = ((ProductUnit<?>) right).elements;
-      rightElems = new Element[elems.length];
-      for (int i = 0; i < elems.length; i++) {
-        rightElems[i] = new Element(elems[i].unit, -elems[i].pow, elems[i].root);
-      }
-    } else
-      rightElems = new Element[] { new Element(right, -1, 1) };
+    Element[] leftElems = getElements(left);
+    Element[] rightElems = inverseElements(getElements(right));
     return getInstance(leftElems, rightElems);
+  }
+
+  private static Element[] inverseElements(Element[] elems) {
+    Element[] res = new Element[elems.length];
+    for (int i = 0; i < elems.length; i++) {
+      res[i] = new Element(elems[i].unit, -elems[i].pow, elems[i].root);
+    }
+    return res;
   }
 
   /**
@@ -229,7 +243,8 @@ public final class ProductUnit<Q extends Quantity<Q>> extends AbstractUnit<Q> {
    *          the index of the unit element to return.
    * @return the unit element at the specified position.
    * @throws IndexOutOfBoundsException
-   *           if index is out of range <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
+   *           if index is out of range <code>(index &lt; 0 || index &gt;= getUnitCount())
+   *                                   </code>.
    */
   public Unit<?> getUnit(int index) {
     return elements[index].getUnit();
@@ -242,7 +257,8 @@ public final class ProductUnit<Q extends Quantity<Q>> extends AbstractUnit<Q> {
    *          the index of the unit element.
    * @return the unit power exponent at the specified position.
    * @throws IndexOutOfBoundsException
-   *           if index is out of range <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
+   *           if index is out of range <code>(index &lt; 0 || index &gt;= getUnitCount())
+   *                                   </code>.
    */
   public int getUnitPow(int index) {
     return elements[index].getPow();
@@ -255,7 +271,8 @@ public final class ProductUnit<Q extends Quantity<Q>> extends AbstractUnit<Q> {
    *          the index of the unit element.
    * @return the unit root exponent at the specified position.
    * @throws IndexOutOfBoundsException
-   *           if index is out of range <code>(index &lt; 0 || index &gt;= getUnitCount())</code>.
+   *           if index is out of range <code>(index &lt; 0 || index &gt;= getUnitCount())
+   *                                   </code>.
    */
   public int getUnitRoot(int index) {
     return elements[index].getRoot();
@@ -277,8 +294,6 @@ public final class ProductUnit<Q extends Quantity<Q>> extends AbstractUnit<Q> {
     }
     if (obj instanceof ProductUnit) {
       ProductUnit other = (ProductUnit) obj;
-      Arrays.sort(elements);
-      Arrays.sort(other.elements);
       return Arrays.equals(elements, other.elements);
     }
     if (obj instanceof Unit<?>) {
@@ -290,11 +305,11 @@ public final class ProductUnit<Q extends Quantity<Q>> extends AbstractUnit<Q> {
 
   @Override
   public int hashCode() {
-    if (elements.length == 1 && equals(elements[0])) {
-      return elements[0].hashCode();
+    int res = 0;
+    for (Element element : elements) {
+      res += element.hashCode();
     }
-    Arrays.sort(elements);
-    return Arrays.hashCode(elements);
+    return res;
   }
 
   @SuppressWarnings("unchecked")
@@ -414,6 +429,7 @@ public final class ProductUnit<Q extends Quantity<Q>> extends AbstractUnit<Q> {
     else {
       Element[] elems = new Element[resultIndex];
       System.arraycopy(result, 0, elems, 0, resultIndex);
+      Arrays.sort(elems);
       return new ProductUnit(elems);
     }
   }

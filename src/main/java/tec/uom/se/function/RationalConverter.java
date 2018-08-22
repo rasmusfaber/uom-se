@@ -29,14 +29,15 @@
  */
 package tec.uom.se.function;
 
-import javax.measure.UnitConverter;
-
 import tec.uom.lib.common.function.ValueSupplier;
 import tec.uom.se.AbstractConverter;
 
+import javax.measure.UnitConverter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -55,8 +56,8 @@ import java.util.function.Supplier;
 public final class RationalConverter extends AbstractConverter implements ValueSupplier<Double>, Supplier<Double>, DoubleSupplier {
 
   /**
-   * 
-   */
+	 *
+	 */
   private static final long serialVersionUID = 3563384008357680074L;
 
   /**
@@ -68,6 +69,16 @@ public final class RationalConverter extends AbstractConverter implements ValueS
    * Holds the converter divisor (always positive).
    */
   private final BigInteger divisor;
+  private static final BigInteger TEN = BigInteger.valueOf(10);
+
+  private static final Map<BigInteger, Integer> BIG_INTEGER_INTEGER_MAP = new HashMap<>();
+
+  static {
+    // Double.MIN_VALUE is approx. 4.9e-324 and Double.MAX_VALUE is approx. 1.8e308
+    for (int n = 0; n <= 32; n++) {
+      BIG_INTEGER_INTEGER_MAP.put(TEN.pow(n), n);
+    }
+  }
 
   /**
    * Creates a rational converter with the specified dividend and divisor.
@@ -86,12 +97,17 @@ public final class RationalConverter extends AbstractConverter implements ValueS
       throw new IllegalArgumentException("Negative or zero divisor");
     if (dividend.equals(divisor))
       throw new IllegalArgumentException("Would result in identity converter");
-    this.dividend = dividend; // Exact conversion.
-    this.divisor = divisor; // Exact conversion.
+    this.dividend = dividend; // Exact conversion
+    if (divisor.compareTo(BigInteger.ONE) == 0) {
+      this.divisor = BigInteger.ONE;
+    } else {
+      this.divisor = divisor; // Exact conversion.
+    }
   }
 
   /**
-   * Convenience method equivalent to <code>new RationalConverter(BigInteger.valueOf(dividend), BigInteger.valueOf(divisor))</code>
+   * Convenience method equivalent to <code>new RationalConverter(BigInteger.valueOf(dividend), BigInteger.valueOf
+   * (divisor))</code>
    *
    * @param dividend
    *          the dividend.
@@ -139,8 +155,8 @@ public final class RationalConverter extends AbstractConverter implements ValueS
   }
 
   /**
-   * Convenience method equivalent to <code>new RationalConverter(BigDecimal.valueOf(dividend).toBigInteger(), 
-   *    BigDecimal.valueOf(divisor).toBigInteger())</code>
+   * Convenience method equivalent to <code>new RationalConverter(BigDecimal.valueOf(dividend).toBigInteger(),
+   * BigDecimal.valueOf(divisor).toBigInteger())</code>
    *
    * @param dividend
    *          the dividend.
@@ -187,21 +203,53 @@ public final class RationalConverter extends AbstractConverter implements ValueS
   @Override
   public BigDecimal convert(BigDecimal value, MathContext ctx) throws ArithmeticException {
     BigDecimal decimalDividend = new BigDecimal(dividend, 0);
+    BigDecimal multiplied = value.multiply(decimalDividend, ctx);
+    if (divisor == BigInteger.ONE) {
+      return multiplied;
+    }
     BigDecimal decimalDivisor = new BigDecimal(divisor, 0);
-    return value.multiply(decimalDividend, ctx).divide(decimalDivisor, ctx);
+    return multiplied.divide(decimalDivisor, ctx);
   }
 
   @Override
   public UnitConverter concatenate(UnitConverter converter) {
-    if (!(converter instanceof RationalConverter))
+    if (!(converter instanceof RationalConverter) && !(converter instanceof PowerOfTenConverter)) {
       return super.concatenate(converter);
-    RationalConverter that = (RationalConverter) converter;
-    BigInteger newDividend = this.getDividend().multiply(that.getDividend());
-    BigInteger newDivisor = this.getDivisor().multiply(that.getDivisor());
+    }
+    BigInteger newDividend;
+    BigInteger newDivisor;
+    if (converter instanceof RationalConverter) {
+      RationalConverter that = (RationalConverter) converter;
+      newDividend = this.getDividend().multiply(that.getDividend());
+      newDivisor = this.getDivisor().multiply(that.getDivisor());
+    } else {
+      PowerOfTenConverter that = (PowerOfTenConverter) converter;
+      if (that.getPowerOfTen() > 0) {
+        newDividend = this.getDividend().multiply(TEN.pow(that.getPowerOfTen()));
+        newDivisor = this.getDivisor();
+      } else {
+        newDividend = this.getDividend();
+        newDivisor = this.getDivisor().multiply(TEN.pow(-that.getPowerOfTen()));
+      }
+    }
     BigInteger gcd = newDividend.gcd(newDivisor);
     newDividend = newDividend.divide(gcd);
     newDivisor = newDivisor.divide(gcd);
-    return (newDividend.equals(BigInteger.ONE) && newDivisor.equals(BigInteger.ONE)) ? IDENTITY : new RationalConverter(newDividend, newDivisor);
+    if (newDivisor.compareTo(BigInteger.ONE) == 0) {
+      if (newDividend.compareTo(BigInteger.ONE) == 0) {
+        return IDENTITY;
+      }
+      Integer powerOfTen = BIG_INTEGER_INTEGER_MAP.get(newDividend);
+      if (powerOfTen != null) {
+        return new PowerOfTenConverter(powerOfTen);
+      }
+    } else if (newDividend.compareTo(BigInteger.ONE) == 0) {
+      Integer powerOfTen = BIG_INTEGER_INTEGER_MAP.get(newDivisor);
+      if (powerOfTen != null) {
+        return new PowerOfTenConverter(-powerOfTen);
+      }
+    }
+    return new RationalConverter(newDividend, newDivisor);
   }
 
   @Override

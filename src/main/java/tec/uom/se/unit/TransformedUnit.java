@@ -29,42 +29,41 @@
  */
 package tec.uom.se.unit;
 
-import java.util.Map;
-import java.util.Objects;
+import tec.uom.lib.common.function.UnitConverterSupplier;
+import tec.uom.se.AbstractConverter;
+import tec.uom.se.AbstractUnit;
 
 import javax.measure.Dimension;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
-
-import tec.uom.lib.common.function.UnitConverterSupplier;
-import tec.uom.se.AbstractUnit;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
  * This class represents the units derived from other units using {@linkplain UnitConverter converters}.
  * </p>
- *
+ * <p>
  * <p>
  * Examples of transformed units:<code>
- *         CELSIUS = KELVIN.shift(273.15);
- *         FOOT = METRE.multiply(3048).divide(10000);
- *         MILLISECOND = MILLI(SECOND);
- *     </code>
+ * CELSIUS = KELVIN.shift(273.15);
+ * FOOT = METRE.multiply(3048).divide(10000);
+ * MILLISECOND = MILLI(SECOND);
+ * </code>
  * </p>
- *
+ * <p>
  * <p>
  * Transformed units have no symbol. But like any other units, they may have labels attached to them (see
  * {@link javax.measure.format.UnitFormat#label(Unit, String) UnitFormat.label}
  * </p>
- *
+ * <p>
  * <p>
  * Instances of this class are created through the {@link AbstractUnit#transform} method.
  * </p>
  *
  * @param <Q>
  *          The type of the quantity measured by this unit.
- *
  * @author <a href="mailto:jean-marie@dautelle.com">Jean-Marie Dautelle</a>
  * @author <a href="mailto:units@catmedia.us">Werner Keil</a>
  * @version 1.0.4, June 9, 2017
@@ -73,8 +72,8 @@ import tec.uom.se.AbstractUnit;
 public final class TransformedUnit<Q extends Quantity<Q>> extends AbstractUnit<Q> implements UnitConverterSupplier {
 
   /**
-     *
-     */
+	 *
+	 */
   private static final long serialVersionUID = 1L;
 
   /**
@@ -99,7 +98,7 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends AbstractUnit<Q
 
   /**
    * Creates a transformed unit from the specified system unit. using the parent as symbol
-   * 
+   *
    * @param parentUnit
    *          the system unit from which this unit is derived.
    * @param converter
@@ -125,7 +124,7 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends AbstractUnit<Q
 
   /**
    * Creates a transformed unit from the specified parent and system unit. using the parent as symbol
-   * 
+   *
    * @param parentUnit
    *          the parent unit from which this unit is derived.
    * @param sysUnit
@@ -179,6 +178,12 @@ public final class TransformedUnit<Q extends Quantity<Q>> extends AbstractUnit<Q
   @Override
   public Map<? extends Unit<?>, Integer> getBaseUnits() {
     return parentUnit.getBaseUnits();
+  }
+
+  @Override
+  public AbstractUnit<Q> transform(UnitConverter operation) {
+    UnitConverter newConverter = this.converter.concatenate(operation);
+    return parentUnit.transform(newConverter);
   }
 
   @Override

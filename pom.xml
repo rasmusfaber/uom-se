@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.conscius.etrm</groupId>
 	<artifactId>uom-se</artifactId>
 	<name>Units of Measurement Implementation for Java SE</name>
 	<url>https://github.com/unitsofmeasurement/uom-se</url>
@@ -9,13 +10,13 @@
 		<name>Units of Measurement project</name>
 		<url>http://unitsofmeasurement.github.io</url>
 	</organization>
-	<version>1.0.9-SNAPSHOT</version>
+	<version>1.0.9-conscius-5</version>
 	<packaging>bundle</packaging>
-	<parent>
+	<!--<parent>
 		<groupId>tec.uom</groupId>
 		<artifactId>uom-parent</artifactId>
 		<version>1.0.4</version>
-	</parent>
+	</parent>-->
 	<scm>
 		<url>https://github.com/unitsofmeasurement/uom-se.git</url>
 	</scm>
@@ -46,6 +47,7 @@
 		<additionalparam>-Xdoclint:none</additionalparam>
 		<hamcrest.version>1.3</hamcrest.version>
 		<maven.source.version>3.0.1</maven.source.version>
+		<junit.version>4.12</junit.version>
 	</properties>
 
 	<dependencies>
@@ -82,6 +84,18 @@
 				<version>${hamcrest.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>javax.measure</groupId>
+				<artifactId>unit-api</artifactId>
+				<version>${jsr.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -103,7 +117,7 @@
 					</executions>
 				</plugin>
 
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
+				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
@@ -197,7 +211,8 @@
 						</manifest>
 						<manifestEntries>
 							<Specification-Title>Units of Measurement Implementation for Java
-								SE</Specification-Title>
+								SE
+							</Specification-Title>
 							<Specification-Version>${project.version}</Specification-Version>
 							<Specification-Vendor>${project.organization.name}</Specification-Vendor>
 							<Implementation-Vendor>Unit-API contributors</Implementation-Vendor>
@@ -317,15 +332,22 @@
 							<artifactId>maven-javadoc-plugin</artifactId>
 							<version>2.9.1</version>
 							<configuration>
-								<source>${project.build.javaVersion}</source>             <!-- Enables javadoc to handle assertions present in J2SE 1.4. -->
-								<encoding>${project.build.sourceEncoding}</encoding>       <!-- The encoding of the source files. -->
-								<docencoding>${project.build.sourceEncoding}</docencoding> <!-- The encoding of the generated HTML files. -->
-								<charset>${sourceEncoding}</charset>         <!-- Specifies the HTML character set for this document. -->
-								<locale>en</locale>              <!-- Locale that javadoc uses when generating documentation. -->
-								<noqualifier>all</noqualifier>   <!-- Omit qualifying package name before class names in output. -->
+								<source>${project.build.javaVersion}
+								</source>             <!-- Enables javadoc to handle assertions present in J2SE 1.4. -->
+								<encoding>${project.build.sourceEncoding}
+								</encoding>       <!-- The encoding of the source files. -->
+								<docencoding>${project.build.sourceEncoding}
+								</docencoding> <!-- The encoding of the generated HTML files. -->
+								<charset>${sourceEncoding}
+								</charset>         <!-- Specifies the HTML character set for this document. -->
+								<locale>en
+								</locale>              <!-- Locale that javadoc uses when generating documentation. -->
+								<noqualifier>all
+								</noqualifier>   <!-- Omit qualifying package name before class names in output. -->
 								<quiet>true</quiet>              <!-- Shuts off non-error and non-warning messages. -->
-								<keywords>true</keywords>        <!-- Adds HTML meta keyword tags to the generated files. -->
-								<!-- Creates links to existing javadoc-generated documentation of 
+								<keywords>true
+								</keywords>        <!-- Adds HTML meta keyword tags to the generated files. -->
+								<!-- Creates links to existing javadoc-generated documentation of
 									external referenced classes. -->
 								<links>
 									<link>http://docs.oracle.com/javase/8/docs/api/</link>
@@ -380,10 +402,10 @@
 						<!-- ======================================================= -->
 						<!-- Static analysis for occurences of bug patterns -->
 						<!-- ======================================================= -->
-						<!-- plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId> 
-							<version>2.5.2</version> </plugin> <plugin> <groupId>org.apache.maven.plugins</groupId> 
-							<artifactId>maven-checkstyle-plugin</artifactId> <version>2.11</version> 
-							<configuration> <configLocation>src/main/config/checkstyle.xml</configLocation> 
+						<!-- plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>findbugs-maven-plugin</artifactId>
+							<version>2.5.2</version> </plugin> <plugin> <groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-checkstyle-plugin</artifactId> <version>2.11</version>
+							<configuration> <configLocation>src/main/config/checkstyle.xml</configLocation>
 							</configuration> </plugin -->
 					</reportPlugins>
 				</configuration>
@@ -393,6 +415,7 @@
 
 	<!-- Additional repositories -->
 	<!-- Helps to resolve Parent POM and Snapshot artifacts -->
+	<!--
 	<repositories>
 		<repository>
 			<id>jcenter</id>
@@ -416,7 +439,24 @@
 			<url>http://oss.jfrog.org/artifactory/libs-snapshot</url>
 		</repository>
 	</repositories>
-
+	-->
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>libs-releases</name>
+			<url>http://artifactory.conscius.com/artifactory/libs-releases</url>
+		</repository>
+		<repository>
+			<snapshots/>
+			<id>snapshots</id>
+			<name>libs-snapshots</name>
+			<url>http://artifactory.conscius.com/artifactory/libs-snapshots</url>
+		</repository>
+	</repositories>
+	<!--
 	<distributionManagement>
 		<repository>
 			<id>bintray-release</id>
@@ -427,6 +467,19 @@
 			<id>bintray-snapshot</id>
 			<name>oss-jfrog-artifactory-snapshot</name>
 			<url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
+		</snapshotRepository>
+	</distributionManagement>
+	-->
+	<distributionManagement>
+		<repository>
+			<id>central</id>
+			<name>libs-releases</name>
+			<url>http://artifactory.conscius.com/artifactory/libs-releases</url>
+		</repository>
+		<snapshotRepository>
+			<id>snapshots</id>
+			<name>libs-snapshots</name>
+			<url>http://artifactory.conscius.com/artifactory/libs-snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 	<ciManagement>
@@ -467,10 +520,26 @@
 				</plugins>
 			</build>
 
+			<!--			<pluginRepositories>
+                            <pluginRepository>
+                                <id>reficio</id>
+                                <url>http://repo.reficio.org/maven/</url>
+                            </pluginRepository>
+                        </pluginRepositories>-->
 			<pluginRepositories>
 				<pluginRepository>
-					<id>reficio</id>
-					<url>http://repo.reficio.org/maven/</url>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+					<id>central</id>
+					<name>plugins-releases</name>
+					<url>http://artifactory.conscius.com/artifactory/plugins-releases</url>
+				</pluginRepository>
+				<pluginRepository>
+					<snapshots/>
+					<id>snapshots</id>
+					<name>plugins-snapshots</name>
+					<url>http://artifactory.conscius.com/artifactory/plugins-snapshots</url>
 				</pluginRepository>
 			</pluginRepositories>
 		</profile>

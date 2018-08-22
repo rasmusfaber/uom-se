@@ -29,7 +29,6 @@
  */
 package tec.uom.se.unit;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import tec.uom.se.quantity.Quantities;
 
@@ -39,16 +38,22 @@ import javax.measure.UnitConverter;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Mass;
 import javax.measure.quantity.Volume;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static tec.uom.se.unit.MetricPrefix.*;
-import static tec.uom.se.unit.Units.*;
-
-import java.util.List;
+import static tec.uom.se.unit.MetricPrefix.DECI;
+import static tec.uom.se.unit.MetricPrefix.KILO;
+import static tec.uom.se.unit.MetricPrefix.MEGA;
+import static tec.uom.se.unit.MetricPrefix.MICRO;
+import static tec.uom.se.unit.MetricPrefix.MILLI;
+import static tec.uom.se.unit.MetricPrefix.NANO;
+import static tec.uom.se.unit.Units.GRAM;
+import static tec.uom.se.unit.Units.KILOGRAM;
+import static tec.uom.se.unit.Units.LITRE;
 
 public class PrefixTest {
   @Test
@@ -158,7 +163,6 @@ public class PrefixTest {
   }
 
   @Test
-  @Ignore("This is research for https://github.com/unitsofmeasurement/uom-se/issues/164")
   public void testNestedOperationsShouldBeSame() {
     Unit<Mass> m1 = MICRO(GRAM);
     Unit<Mass> m2 = GRAM.divide(1000).divide(1000);
